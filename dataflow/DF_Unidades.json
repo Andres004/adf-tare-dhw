@@ -1,0 +1,85 @@
+{
+	"name": "DF_Unidades",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Unidades",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeUnidades"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Unidades",
+						"type": "DatasetReference"
+					},
+					"name": "SilverUnidades"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroUnidades"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_unidad as string,",
+				"          id_brigada as string,",
+				"          nombre as string,",
+				"          codigo as string,",
+				"          ciudad as string,",
+				"          departamento as string,",
+				"          tipo_cuartel as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeUnidades",
+				"BronzeUnidades derive(id_unidad = toInteger({id_unidad}),",
+				"          id_brigada = toInteger({id_brigada}),",
+				"          nombre = trim({nombre}),",
+				"          codigo = trim({codigo}),",
+				"          ciudad = trim({ciudad}),",
+				"          departamento = trim({departamento}),",
+				"          tipo_cuartel = lower(trim(tipo_cuartel))) ~> FiltroUnidades",
+				"FiltroUnidades sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_unidad as string,",
+				"          id_brigada as string,",
+				"          nombre as string,",
+				"          codigo as string,",
+				"          ciudad as string,",
+				"          departamento as string,",
+				"          tipo_cuartel as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_unidad,",
+				"          id_brigada,",
+				"          nombre,",
+				"          codigo,",
+				"          ciudad,",
+				"          departamento,",
+				"          tipo_cuartel",
+				"     )) ~> SilverUnidades"
+			]
+		}
+	}
+}
