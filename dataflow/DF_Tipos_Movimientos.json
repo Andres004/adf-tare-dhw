@@ -1,0 +1,69 @@
+{
+	"name": "DF_Tipos_Movimientos",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Tipos_Movimiento",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeTiposMovimientos"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Tipos_Movimientos",
+						"type": "DatasetReference"
+					},
+					"name": "SilverTiposMovimientos"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroTiposMovimiento"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_tipo as string,",
+				"          nombre as string,",
+				"          descripcion as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeTiposMovimientos",
+				"BronzeTiposMovimientos derive(id_tipo = toInteger(id_tipo),",
+				"          nombre = replace(lower(trim(nombre)), 'reincorporacion', 'reincorporación'),",
+				"          descripcion = trim(descripcion)) ~> FiltroTiposMovimiento",
+				"FiltroTiposMovimiento sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_tipo as string,",
+				"          nombre as string,",
+				"          descripcion as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_tipo,",
+				"          nombre,",
+				"          descripcion",
+				"     )) ~> SilverTiposMovimientos"
+			]
+		}
+	}
+}

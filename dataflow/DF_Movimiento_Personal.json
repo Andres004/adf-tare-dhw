@@ -1,0 +1,93 @@
+{
+	"name": "DF_Movimiento_Personal",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Movimiento_Personal",
+						"type": "DatasetReference"
+					},
+					"name": "BronzerMovimientoPersonal"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Movimiento_Personal",
+						"type": "DatasetReference"
+					},
+					"name": "SilverMovimientoPersonal"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FitroMovimientoPersonal"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_movimiento as string,",
+				"          id_efectivo as string,",
+				"          id_unidad_destino as string,",
+				"          id_rango as string,",
+				"          id_tipo as string,",
+				"          fecha_movimiento as string,",
+				"          antiguedad_anios as string,",
+				"          salario_mensual as string,",
+				"          observaciones as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzerMovimientoPersonal",
+				"BronzerMovimientoPersonal derive(id_movimiento = toInteger(regexReplace(id_movimiento, '[^0-9]', '')),",
+				"          id_efectivo = toInteger(regexReplace(id_efectivo, '[^0-9]', '')),",
+				"          id_unidad_destino = toInteger(regexReplace(id_unidad_destino, '[^0-9]', '')),",
+				"          id_rango = toInteger(regexReplace(id_rango, '[^0-9]', '')),",
+				"          id_tipo = toInteger(regexReplace(id_tipo, '[^0-9]', '')),",
+				"          fecha_movimiento = coalesce(     toDate(fecha_movimiento, 'yyyy/MM/dd'),     toDate(fecha_movimiento, 'yyyy-MM-dd'),     toDate(fecha_movimiento, 'dd/MM/yyyy'),     toDate(fecha_movimiento, 'yyyyMMdd'),     toDate(fecha_movimiento, 'dd-MM-yyyy'),     toDate(fecha_movimiento, 'MM-dd-yyyy') ),",
+				"          antiguedad_anios = toDecimal(     replace(         regexReplace(             regexReplace(                 replace(                     replace(                         replace(                             replace(                                 replace(                                     replace(                                         replace(                                             replace(                                                 replace(                                                     replace(                                                         replace(                                                             replace(                                                                 replace(                                                                     replace(                                                                         replace(                                                                             replace(                                                                                 replace(                                                                                     replace(                                                                                         replace(                                                                                             replace(                                                                                                 replace(                                                                                                     replace(                                                                                                         replace(                                                                                                             replace(                                                                                                                 replace(                                                                                                                     replace(                                                                                                                         lower(trim(antiguedad_anios)),                                                                                                                      'aprox.', ''),                                                                                                                 'veinticinco', '25'),                                                                                                             'veinticuatro', '24'),                                                                                                         'veintitrés', '23'),                                                                                                     'veintidós', '22'),                                                                                                 'veintiuno', '21'),                                                                                             'diecinueve', '19'),                                                                                         'dieciocho', '18'),                                                                                     'diecisiete', '17'),                                                                                 'dieciséis', '16'),                                                                             'quince', '15'),                                                                         'catorce', '14'),                                                                     'trece', '13'),                                                                 'doce', '12'),                                                             'once', '11'),                                                         'veinte', '20'),                                                     'nueve', '9'),                                                 'siete', '7'),                                             'cinco', '5'),                                         'ocho', '8'),                                     'tres', '3'),                                 'seis', '6'),                             'diez', '10'),                         'cero', '0'),                     'dos', '2'),                 'uno', '1'),             ',', '.'         ),          '[^0-9\\\\.]', ''     ),     '\\\\.$', '' ), 4, 1),",
+				"          salario_mensual = iif(     isNull(salario_mensual) || rlike(lower(trim(salario_mensual)), '^(null|n/d|nd|n/a|sin dato|s/d|\\\\-+)$|^$'), toDecimal(null()),     toDecimal(         toFloat(             iif(                 rlike(regexReplace(regexReplace(salario_mensual, '(?i)bs\\\\.?', ''), '[^0-9\\\\.,]', ''), ',\\\\d{1,2}$'),                  replace(replace(regexReplace(regexReplace(salario_mensual, '(?i)bs\\\\.?', ''), '[^0-9\\\\.,]', ''), '.', ''), ',', '.'),                  replace(regexReplace(regexReplace(salario_mensual, '(?i)bs\\\\.?', ''), '[^0-9\\\\.,]', ''), ',', '')             )         ),          18, 2     ) ),",
+				"          observaciones = iif(in(['n/a', 's/n', 'sin obs.', 'sin observaciones', 'sin obs', '-', 'null', ''], lower(trim(observaciones))), toString(null()),      initCap(         trim(             regexReplace(                 regexReplace(                     regexReplace(observaciones, '(?i)^ref:\\\\s*', ''),                      '[\\\\n\\\\r\\\\t\\\\\\\\]', ' '                 ),                  '\\\\s+', ' '             )         )     ) )) ~> FitroMovimientoPersonal",
+				"FitroMovimientoPersonal sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_movimiento as string,",
+				"          id_efectivo as string,",
+				"          id_unidad_destino as string,",
+				"          id_rango as string,",
+				"          id_tipo as string,",
+				"          fecha_movimiento as date,",
+				"          antiguedad_anios as integer,",
+				"          salario_mensual as decimal(18,2),",
+				"          observaciones as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_movimiento,",
+				"          id_efectivo,",
+				"          id_unidad_destino,",
+				"          id_rango,",
+				"          id_tipo,",
+				"          fecha_movimiento,",
+				"          antiguedad_anios,",
+				"          salario_mensual,",
+				"          observaciones",
+				"     )) ~> SilverMovimientoPersonal"
+			]
+		}
+	}
+}

@@ -1,0 +1,77 @@
+{
+	"name": "DF_Rangos",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Rangos",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeRangos"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Rangos",
+						"type": "DatasetReference"
+					},
+					"name": "SilverRangos"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroRangos"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_rango as string,",
+				"          nombre as string,",
+				"          categoria as string,",
+				"          nivel_jerarquico as string,",
+				"          abreviatura as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeRangos",
+				"BronzeRangos derive(id_rango = toInteger(id_rango),",
+				"          nombre = trim(nombre),",
+				"          categoria = trim(categoria),",
+				"          nivel_jerarquico = toInteger(nivel_jerarquico),",
+				"          abreviatura = trim(abreviatura)) ~> FiltroRangos",
+				"FiltroRangos sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_rango as string,",
+				"          nombre as string,",
+				"          categoria as string,",
+				"          nivel_jerarquico as integer,",
+				"          abreviatura as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_rango,",
+				"          nombre,",
+				"          categoria,",
+				"          nivel_jerarquico,",
+				"          abreviatura",
+				"     )) ~> SilverRangos"
+			]
+		}
+	}
+}
