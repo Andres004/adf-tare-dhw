@@ -1,0 +1,85 @@
+{
+	"name": "DF_Silver_Zonas",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Zonas",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeZonas"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Zonas",
+						"type": "DatasetReference"
+					},
+					"name": "SilverZonas"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroZonas"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_zona as string,",
+				"          nombre as string,",
+				"          departamento as string,",
+				"          frontera_con as string,",
+				"          tipo_terreno as string,",
+				"          altitud_msnm as string,",
+				"          acceso_carretero as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeZonas",
+				"BronzeZonas derive(id_zona = toInteger(id_zona),",
+				"          nombre = trim(nombre),",
+				"          departamento = trim(departamento),",
+				"          frontera_con = iif(upper(trim(frontera_con)) == 'NULL', toString(null()), trim(frontera_con)),",
+				"          tipo_terreno = lower(trim(tipo_terreno)),",
+				"          altitud_msnm = toInteger(altitud_msnm)    ,",
+				"          acceso_carretero = ERROR_FUNCTION('')) ~> FiltroZonas",
+				"FiltroZonas sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_zona as string,",
+				"          nombre as string,",
+				"          departamento as string,",
+				"          frontera_con as string,",
+				"          tipo_terreno as string,",
+				"          altitud_msnm as integer,",
+				"          acceso_carretero as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_zona,",
+				"          nombre,",
+				"          departamento,",
+				"          frontera_con,",
+				"          tipo_terreno,",
+				"          altitud_msnm,",
+				"          acceso_carretero",
+				"     )) ~> SilverZonas"
+			]
+		}
+	}
+}
