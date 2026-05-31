@@ -1,0 +1,103 @@
+{
+	"name": "DF_Operaciones",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeOperaciones"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "SilverOperaciones"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroOperaciones"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_operacion as string,",
+				"          id_tipo as string,",
+				"          id_unidad_resp as string,",
+				"          id_zona as string,",
+				"          nombre_operacion as string,",
+				"          fecha_inicio as string,",
+				"          fecha_fin as string,",
+				"          efectivos_desplegados as string,",
+				"          vehiculos_utilizados as string,",
+				"          duracion_dias as string,",
+				"          costo_operacion as string,",
+				"          resultado as string,",
+				"          detenidos as string,",
+				"          area_km2 as string,",
+				"          incidentes as string,",
+				"          observaciones as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeOperaciones",
+				"BronzeOperaciones derive(id_operacion = toInteger(regexReplace({id_operacion}, '[^0-9]', '')),",
+				"          id_tipo = toInteger(regexReplace({id_tipo}, '[^0-9]', '')),",
+				"          id_unidad_resp = toInteger(regexReplace({id_unidad_resp}, '[^0-9]', '')),",
+				"          id_zona = toInteger(regexReplace({id_zona}, '[^0-9]', '')),",
+				"          nombre_operacion = initCap(trim(regexReplace(regexReplace(regexReplace(nombre_operacion, '[\"#]', ''), '[-—/]', ' '), '\\\\s+', ' '))),",
+				"          fecha_inicio = coalesce(     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(lower({fecha_inicio}), '[\\\\/,\\\\s]+', '-'), 'ene(ro)?', '01'), 'feb(rero)?', '02'), 'mar(zo)?', '03'), 'abr(il)?', '04'), 'may(o)?', '05'), 'jun(io)?', '06'), 'jul(io)?', '07'), 'ago(sto)?', '08'), 'sep(tiembre)?', '09'), 'oct(ubre)?', '10'), 'nov(iembre)?', '11'), 'dic(iembre)?', '12'), 'dd-MM-yyyy'),     toDate({fecha_inicio}, 'yyyy-MM-dd'),     toDate({fecha_inicio}, 'yyyy/MM/dd'),     toDate({fecha_inicio}, 'MM-dd-yyyy'),     toDate({fecha_inicio}, 'yyyyMMdd') ),",
+				"          fecha_fin = coalesce(     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(lower({fecha_fin}), '[\\\\/,\\\\s]+', '-'), 'ene(ro)?', '01'), 'feb(rero)?', '02'), 'mar(zo)?', '03'), 'abr(il)?', '04'), 'may(o)?', '05'), 'jun(io)?', '06'), 'jul(io)?', '07'), 'ago(sto)?', '08'), 'sep(tiembre)?', '09'), 'oct(ubre)?', '10'), 'nov(iembre)?', '11'), 'dic(iembre)?', '12'), 'dd-MM-yyyy'),     toDate({fecha_fin}, 'yyyy-MM-dd'),     toDate({fecha_fin}, 'yyyy/MM/dd'),     toDate({fecha_fin}, 'MM-dd-yyyy'),     toDate({fecha_fin}, 'yyyyMMdd') ),",
+				"          efectivos_desplegados = iif(in(['null', 'n/a', 's/n', 's/d', 'sin dato', '-'], lower(trim(efectivos_desplegados))), toInteger(null()),      toInteger(regexReplace(         case(             rlike(lower(efectivos_desplegados), '.*trescientos.*'), '300',             rlike(lower(efectivos_desplegados), '.*doscientos.*'), '200',             rlike(lower(efectivos_desplegados), '.*cien.*'), '100',             rlike(lower(efectivos_desplegados), '.*cincuenta.*'), '50',             rlike(lower(efectivos_desplegados), '.*veinte.*'), '20',             rlike(lower(efectivos_desplegados), '.*diecis[eé]is.*'), '16',             rlike(lower(efectivos_desplegados), '.*quince.*'), '15',             rlike(lower(efectivos_desplegados), '.*catorce.*'), '14',             rlike(lower(efectivos_desplegados), '.*trece.*'), '13',             rlike(lower(efectivos_desplegados), '.*doce.*'), '12',             rlike(lower(efectivos_desplegados), '.*once.*'), '11',             rlike(lower(efectivos_desplegados), '.*diez.*'), '10',             rlike(lower(efectivos_desplegados), '.*nueve.*'), '9',             rlike(lower(efectivos_desplegados), '.*ocho.*'), '8',             rlike(lower(efectivos_desplegados), '.*siete.*'), '7',             rlike(lower(efectivos_desplegados), '.*seis.*'), '6',             rlike(lower(efectivos_desplegados), '.*cinco.*'), '5',             rlike(lower(efectivos_desplegados), '.*cuatro.*'), '4',             rlike(lower(efectivos_desplegados), '.*tres.*'), '3',             rlike(lower(efectivos_desplegados), '.*dos.*'), '2',             rlike(lower(efectivos_desplegados), '.*un[oa]?.*'), '1',             rlike(lower(efectivos_desplegados), '.*(cero|ning[uú]n|sin\\\\s).*'), '0',             efectivos_desplegados         ),          '[^0-9]', ''     )) ),",
+				"          vehiculos_utilizados = iif(in(['null', 'n/a', 's/n', 's/d', 'sin dato', '-'], lower(trim(vehiculos_utilizados))), toInteger(null()),      toInteger(regexReplace(         case(             rlike(lower(vehiculos_utilizados), '.*trescientos.*'), '300',             rlike(lower(vehiculos_utilizados), '.*doscientos.*'), '200',             rlike(lower(vehiculos_utilizados), '.*cien.*'), '100',             rlike(lower(vehiculos_utilizados), '.*cincuenta.*'), '50',             rlike(lower(vehiculos_utilizados), '.*veinte.*'), '20',             rlike(lower(vehiculos_utilizados), '.*diecis[eé]is.*'), '16',             rlike(lower(vehiculos_utilizados), '.*quince.*'), '15',             rlike(lower(vehiculos_utilizados), '.*catorce.*'), '14',             rlike(lower(vehiculos_utilizados), '.*trece.*'), '13',             rlike(lower(vehiculos_utilizados), '.*doce.*'), '12',             rlike(lower(vehiculos_utilizados), '.*once.*'), '11',             rlike(lower(vehiculos_utilizados), '.*diez.*'), '10',             rlike(lower(vehiculos_utilizados), '.*nueve.*'), '9',             rlike(lower(vehiculos_utilizados), '.*ocho.*'), '8',             rlike(lower(vehiculos_utilizados), '.*siete.*'), '7',             rlike(lower(vehiculos_utilizados), '.*seis.*'), '6',             rlike(lower(vehiculos_utilizados), '.*cinco.*'), '5',             rlike(lower(vehiculos_utilizados), '.*cuatro.*'), '4',             rlike(lower(vehiculos_utilizados), '.*tres.*'), '3',             rlike(lower(vehiculos_utilizados), '.*dos.*'), '2',             rlike(lower(vehiculos_utilizados), '.*un[oa]?.*'), '1',             rlike(lower(vehiculos_utilizados), '.*(cero|ning[uú]n|sin\\\\s).*'), '0',             vehiculos_utilizados         ),          '[^0-9]', ''     )) ),",
+				"          duracion_dias = ERROR_FUNCTION(''),",
+				"          costo_operacion = ERROR_FUNCTION(''),",
+				"          resultado = ERROR_FUNCTION(''),",
+				"          detenidos = ERROR_FUNCTION(''),",
+				"          area_km2 = ERROR_FUNCTION(''),",
+				"          incidentes = ERROR_FUNCTION(''),",
+				"          observaciones = ERROR_FUNCTION('')) ~> FiltroOperaciones",
+				"FiltroOperaciones sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_operacion as string,",
+				"          id_tipo as string,",
+				"          id_unidad_resp as string,",
+				"          id_zona as string,",
+				"          nombre_operacion as string,",
+				"          fecha_inicio as date,",
+				"          fecha_fin as date,",
+				"          efectivos_desplegados as integer,",
+				"          vehiculos_utilizados as string,",
+				"          duracion_dias as integer,",
+				"          costo_operacion as decimal(18,2),",
+				"          resultado as string,",
+				"          detenidos as integer,",
+				"          area_km2 as decimal(10,2),",
+				"          incidentes as string,",
+				"          observaciones as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> SilverOperaciones"
+			]
+		}
+	}
+}
