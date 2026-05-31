@@ -1,0 +1,68 @@
+{
+	"name": "DF_Silver_Especialidades",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Especialidades",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeEspecialidades"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Especialidades",
+						"type": "DatasetReference"
+					},
+					"name": "SilverEspecialidades"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroEspecialidades"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_especialidad as string,",
+				"          nombre as string,",
+				"          area as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeEspecialidades",
+				"BronzeEspecialidades derive(id_especialidad = toInteger(id_especialidad),",
+				"          nombre = trim(nombre),",
+				"          area = initCap(replace(replace(area, 'tecnica', 'técnica'), '_', ' '))) ~> FiltroEspecialidades",
+				"FiltroEspecialidades sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_especialidad as string,",
+				"          nombre as string,",
+				"          area as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_especialidad,",
+				"          nombre,",
+				"          area",
+				"     )) ~> SilverEspecialidades"
+			]
+		}
+	}
+}

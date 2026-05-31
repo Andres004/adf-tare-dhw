@@ -1,0 +1,49 @@
+{
+	"name": "Silver_Estructura_Organizacional",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Destino_FuerzasArmadas",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Silver"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id_estructura",
+				"type": "varchar"
+			},
+			{
+				"name": "id_padre",
+				"type": "varchar"
+			},
+			{
+				"name": "nivel",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nombre",
+				"type": "varchar"
+			},
+			{
+				"name": "sigla",
+				"type": "varchar"
+			},
+			{
+				"name": "tipo",
+				"type": "varchar"
+			},
+			{
+				"name": "cobertura_departamentos",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "silver",
+			"table": "Estructura_Organizacional"
+		}
+	}
+}

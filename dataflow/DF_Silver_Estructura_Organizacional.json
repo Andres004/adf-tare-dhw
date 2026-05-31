@@ -1,0 +1,84 @@
+{
+	"name": "DF_Silver_Estructura_Organizacional",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Estructura_Organizacional",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeEstructuraOrganizacional"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Estructura_Organizacional",
+						"type": "DatasetReference"
+					},
+					"name": "SilverEstructuraOrganizacional"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroEstructuraOrganizaciona"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_estructura as string,",
+				"          id_padre as string,",
+				"          nivel as string,",
+				"          nombre as string,",
+				"          sigla as string,",
+				"          tipo as string,",
+				"          cobertura_departamentos as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeEstructuraOrganizacional",
+				"BronzeEstructuraOrganizacional derive(id_estructura = toInteger(trim(id_estructura)),",
+				"          id_padre = toInteger(iif(lower(trim(id_padre)) == 'null' || trim(id_padre) == '', toString(null()), id_padre)),",
+				"          nivel = lower(trim(nivel)),",
+				"          nombre = trim(nombre),",
+				"          sigla = iif(upper(trim(sigla)) == 'NULL', toString(null()), trim(sigla)),",
+				"          tipo = iif(upper(trim(tipo)) == 'NULL', toString(null()), trim(tipo)),",
+				"          cobertura_departamentos = iif(upper(trim(cobertura_departamentos)) == 'NULL', toString(null()), trim(regexReplace(cobertura_departamentos, '\\\\s*,\\\\s*', ', ')))) ~> FiltroEstructuraOrganizaciona",
+				"FiltroEstructuraOrganizaciona sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_estructura as string,",
+				"          id_padre as string,",
+				"          nivel as integer,",
+				"          nombre as string,",
+				"          sigla as string,",
+				"          tipo as string,",
+				"          cobertura_departamentos as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_estructura,",
+				"          id_padre,",
+				"          nivel,",
+				"          nombre,",
+				"          sigla,",
+				"          tipo,",
+				"          cobertura_departamentos",
+				"     )) ~> SilverEstructuraOrganizacional"
+			]
+		}
+	}
+}

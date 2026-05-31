@@ -1,0 +1,104 @@
+{
+	"name": "DF_Silver_Efectivos",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Efectivos",
+						"type": "DatasetReference"
+					},
+					"name": "Efectivos"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Efectivos",
+						"type": "DatasetReference"
+					},
+					"name": "SilverEfectivo"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroEfectivos"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_efectivo as string,",
+				"          id_especialidad as string,",
+				"          id_unidad_actual as string,",
+				"          id_rango_actual as string,",
+				"          nombre as string,",
+				"          ci as string,",
+				"          fecha_nacimiento as string,",
+				"          genero as string,",
+				"          departamento_origen as string,",
+				"          fecha_ingreso as string,",
+				"          estado as string,",
+				"          salario_mensual as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> Efectivos",
+				"Efectivos derive(id_efectivo = toInteger(regexReplace(id_efectivo, '[^0-9]', '')),",
+				"          id_especialidad = toInteger(regexReplace(id_especialidad, '[^0-9]', '')),",
+				"          id_unidad_actual = toInteger(regexReplace(id_unidad_actual, '[^0-9]', '')),",
+				"          id_rango_actual = toInteger(regexReplace(id_rango_actual, '[^0-9]', '')),",
+				"          nombre = iif(in(['-', 'n/d', 'null', 'sin dato', ''], lower(trim(nombre))), toString(null()),      initCap(         trim(             regexReplace(                 regexReplace(                     replace(nombre, '\\\\t', ' '),                      '[#\\\\/\\\\t\\\\n\\\\r\\\\\\\\]', ' '                 ),                  '\\\\s+',                  ' '             )         )     ) ),",
+				"          ci = iif(in(['sin dato', 'n/d', 'n/a', 'null', 's/d', '-', ''], lower(trim(ci))), toString(null()),      regexReplace(ci, '[^0-9]', '') ),",
+				"          fecha_nacimiento = coalesce(     toDate(fecha_nacimiento, 'yyyy/MM/dd'),     toDate(fecha_nacimiento, 'dd/MM/yyyy'),     toDate(fecha_nacimiento, 'dd-MM-yyyy'),     toDate(fecha_nacimiento, 'MM-dd-yyyy'),     toDate(fecha_nacimiento, 'yyyyMMdd') ),",
+				"          genero = case(     rlike(lower(genero), '^(m|h).*'), 'M',     rlike(lower(genero), '^(f|muj).*'), 'F',     toString(null()) ),",
+				"          departamento_origen = case(     isNull(departamento_origen) || rlike(lower(trim(departamento_origen)), '^(null|n/d|nd|n/a|sin dato|s/d|\\\\-+)$|^$'), 'Desconocido',     rlike(lower(trim(departamento_origen)), 'paz|lp|l\\\\.p'), 'La Paz',     rlike(lower(trim(departamento_origen)), 'coch|cb'), 'Cochabamba',     rlike(lower(trim(departamento_origen)), 'sant|sc|sta'), 'Santa Cruz',     rlike(lower(trim(departamento_origen)), 'orur|^or\\\\.?$'), 'Oruro',     rlike(lower(trim(departamento_origen)), 'pot|^pt\\\\.?$'), 'Potosí',     rlike(lower(trim(departamento_origen)), 'tar|^tj\\\\.?$'), 'Tarija',     rlike(lower(trim(departamento_origen)), 'chuq|chq|sucr'), 'Chuquisaca',     rlike(lower(trim(departamento_origen)), 'ben|^bn\\\\.?$'), 'Beni',     rlike(lower(trim(departamento_origen)), 'pand|^pn\\\\.?$'), 'Pando',     'Desconocido' ),",
+				"          fecha_ingreso = iif(rlike(lower(trim(fecha_ingreso)), '^(null|n/d|sin dato|\\\\-+)$') || isNull(fecha_ingreso), toDate(null()), coalesce(toDate(fecha_ingreso, 'dd-MM-yyyy'), toDate(fecha_ingreso, 'yyyy/MM/dd'), toDate(fecha_ingreso, 'dd/MM/yyyy'), toDate(fecha_ingreso, 'MM-dd-yyyy'), toDate(fecha_ingreso, 'yyyyMMdd'), toDate(fecha_ingreso, 'yyyy-MM-dd'))),",
+				"          estado = case(     rlike(lower(estado), '^a|act|en actividad'), 'Activo',     rlike(lower(estado), '^b|baj|dado de baja'), 'Baja',     rlike(lower(estado), '^r|rsv|res|en reserva'), 'Reserva',     toString(null()) ),",
+				"          salario_mensual = iif(     isNull(salario_mensual) || rlike(lower(trim(salario_mensual)), '^(null|n/d|nd|n/a|sin dato|s/d|\\\\-+)$|^$'), toDecimal(null()),     toDecimal(         iif(             rlike(regexReplace(regexReplace(salario_mensual, '(?i)bs\\\\.?', ''), '[^0-9\\\\.,]', ''), ',\\\\d{1,2}$'),              replace(replace(regexReplace(regexReplace(salario_mensual, '(?i)bs\\\\.?', ''), '[^0-9\\\\.,]', ''), '.', ''), ',', '.'),              replace(regexReplace(regexReplace(salario_mensual, '(?i)bs\\\\.?', ''), '[^0-9\\\\.,]', ''), ',', '')         ),          18, 2     ) )) ~> FiltroEfectivos",
+				"FiltroEfectivos sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_efectivo as string,",
+				"          id_especialidad as string,",
+				"          id_unidad_actual as string,",
+				"          id_rango_actual as string,",
+				"          nombre as string,",
+				"          ci as string,",
+				"          fecha_nacimiento as date,",
+				"          genero as string,",
+				"          departamento_origen as string,",
+				"          fecha_ingreso as date,",
+				"          estado as string,",
+				"          salario_mensual as decimal(18,2)",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_efectivo,",
+				"          id_especialidad,",
+				"          id_unidad_actual,",
+				"          id_rango_actual,",
+				"          nombre,",
+				"          ci,",
+				"          fecha_nacimiento,",
+				"          genero,",
+				"          departamento_origen,",
+				"          fecha_ingreso,",
+				"          estado,",
+				"          salario_mensual",
+				"     )) ~> SilverEfectivo"
+			]
+		}
+	}
+}

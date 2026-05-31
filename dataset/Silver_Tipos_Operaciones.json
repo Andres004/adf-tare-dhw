@@ -1,0 +1,32 @@
+{
+	"name": "Silver_Tipos_Operaciones",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Destino_FuerzasArmadas",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Silver"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id_tipo",
+				"type": "varchar"
+			},
+			{
+				"name": "nombre",
+				"type": "varchar"
+			},
+			{
+				"name": "categoria",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "silver",
+			"table": "Tipos_Operacion"
+		}
+	}
+}
