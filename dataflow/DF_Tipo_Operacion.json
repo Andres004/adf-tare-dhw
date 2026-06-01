@@ -1,5 +1,5 @@
 {
-	"name": "DF_Gold_Rango",
+	"name": "DF_Tipo_Operacion",
 	"properties": {
 		"folder": {
 			"name": "Gold"
@@ -9,45 +9,40 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "Silver_Rangos",
+						"referenceName": "Silver_Tipos_Operaciones",
 						"type": "DatasetReference"
 					},
-					"name": "SilverRangos"
+					"name": "SilverTipoOperacion"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "Gold_Dim_Rango",
+						"referenceName": "Gold_Dim_Tipo_Operacion",
 						"type": "DatasetReference"
 					},
-					"name": "GoldRangos"
+					"name": "GoldTipoOperacion"
 				}
 			],
 			"transformations": [],
 			"scriptLines": [
 				"source(output(",
-				"          id_rango_origen as integer,",
+				"          id_tipo_origen as integer,",
 				"          nombre as string,",
-				"          categoria as string,",
-				"          nivel_jerarquico as integer,",
-				"          abreviatura as string",
+				"          categoria as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     batchSize: 0,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT \\n    id_rango AS id_rango_origen,\\n    nombre,\\n    categoria,\\n    nivel_jerarquico,\\n    abreviatura\\nFROM silver.rangos',",
-				"     format: 'query') ~> SilverRangos",
-				"SilverRangos sink(allowSchemaDrift: true,",
+				"     query: 'SELECT \\n    id_tipo AS id_tipo_origen,\\n    nombre,\\n    categoria\\nFROM silver.tipos_operacion',",
+				"     format: 'query') ~> SilverTipoOperacion",
+				"SilverTipoOperacion sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
-				"          rango_key as integer,",
-				"          id_rango_origen as integer,",
+				"          tipo_op_key as integer,",
+				"          id_tipo_origen as integer,",
 				"          nombre as string,",
-				"          categoria as string,",
-				"          nivel_jerarquico as integer,",
-				"          abreviatura as string",
+				"          categoria as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -58,12 +53,10 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          id_rango_origen,",
+				"          id_tipo_origen,",
 				"          nombre,",
-				"          categoria,",
-				"          nivel_jerarquico,",
-				"          abreviatura",
-				"     )) ~> GoldRangos"
+				"          categoria",
+				"     )) ~> GoldTipoOperacion"
 			]
 		}
 	}
