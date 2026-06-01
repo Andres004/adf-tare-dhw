@@ -568,8 +568,7 @@
 				"          frontera_con,",
 				"          tipo_terreno,",
 				"          altitud_msnm,",
-				"          acceso_carretero,",
-				"          altitud_msnm = nivel_riesgo",
+				"          acceso_carretero = nivel_riesgo",
 				"     )) ~> BronzZonas"
 			]
 		}
