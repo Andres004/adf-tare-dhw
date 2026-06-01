@@ -13,7 +13,8 @@
 		"schema": [
 			{
 				"name": "id_zona",
-				"type": "varchar"
+				"type": "int",
+				"precision": 10
 			},
 			{
 				"name": "nombre",
@@ -38,6 +39,10 @@
 			},
 			{
 				"name": "acceso_carretero",
+				"type": "varchar"
+			},
+			{
+				"name": "nivel_riesgo",
 				"type": "varchar"
 			}
 		],
