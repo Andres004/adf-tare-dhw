@@ -79,7 +79,8 @@
 				"          frontera_con,",
 				"          tipo_terreno,",
 				"          altitud_msnm,",
-				"          acceso_carretero",
+				"          acceso_carretero,",
+				"          nivel_riesgo",
 				"     )) ~> SilverZonas"
 			]
 		}
