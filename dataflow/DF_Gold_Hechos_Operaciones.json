@@ -50,7 +50,15 @@
 					"name": "DimTiempoFin"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Gold_Dim_Hechos_Operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "GoldHechosOperaciones"
+				}
+			],
 			"transformations": [
 				{
 					"name": "lookup1"
@@ -66,6 +74,9 @@
 				},
 				{
 					"name": "lookup5"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -183,7 +194,74 @@
 				"lookup4, DimTiempoFin lookup(toInteger(toString(fecha_fin, 'yyyyMMdd')) == DimTiempoFin@fecha_key,",
 				"     multiple: false,",
 				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookup5"
+				"     broadcast: 'auto')~> lookup5",
+				"lookup5 select(mapColumn(",
+				"          id_operacion_origen = id_operacion,",
+				"          nombre_operacion,",
+				"          efectivos_desplegados,",
+				"          vehiculos_utilizados,",
+				"          duracion_dias,",
+				"          costo_operacion,",
+				"          resultado,",
+				"          detenidos,",
+				"          area_km2,",
+				"          incidentes,",
+				"          observaciones,",
+				"          tipo_op_key,",
+				"          fecha_inicio_key = DimTiempoFin@fecha_key,",
+				"          fecha_fin_key = DimTiempoInicio@fecha_key,",
+				"          zona_key,",
+				"          unidad_resp_key = unidad_key",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          operacion_key as integer,",
+				"          id_operacion_origen as integer,",
+				"          nombre_operacion as string,",
+				"          resultado as string,",
+				"          observaciones as string,",
+				"          tipo_op_key as integer,",
+				"          unidad_resp_key as integer,",
+				"          zona_key as integer,",
+				"          fecha_inicio_key as integer,",
+				"          fecha_fin_key as integer,",
+				"          efectivos_desplegados as integer,",
+				"          vehiculos_utilizados as integer,",
+				"          duracion_dias as integer,",
+				"          costo_operacion as decimal(18,2),",
+				"          detenidos as integer,",
+				"          area_km2 as decimal(10,2),",
+				"          incidentes as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_operacion_origen,",
+				"          nombre_operacion,",
+				"          resultado,",
+				"          observaciones,",
+				"          tipo_op_key,",
+				"          unidad_resp_key,",
+				"          zona_key,",
+				"          fecha_inicio_key,",
+				"          fecha_fin_key,",
+				"          efectivos_desplegados,",
+				"          vehiculos_utilizados,",
+				"          duracion_dias,",
+				"          costo_operacion,",
+				"          detenidos,",
+				"          area_km2,",
+				"          incidentes",
+				"     )) ~> GoldHechosOperaciones"
 			]
 		}
 	}
