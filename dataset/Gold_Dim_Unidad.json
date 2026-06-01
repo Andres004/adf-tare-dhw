@@ -1,0 +1,62 @@
+{
+	"name": "Gold_Dim_Unidad",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Destino_FuerzasArmadas",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "unidad_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "id_unidad_origen",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nombre_unidad",
+				"type": "varchar"
+			},
+			{
+				"name": "codigo",
+				"type": "varchar"
+			},
+			{
+				"name": "ciudad",
+				"type": "varchar"
+			},
+			{
+				"name": "departamento",
+				"type": "varchar"
+			},
+			{
+				"name": "tipo_cuartel",
+				"type": "varchar"
+			},
+			{
+				"name": "nombre_brigada",
+				"type": "varchar"
+			},
+			{
+				"name": "nombre_division",
+				"type": "varchar"
+			},
+			{
+				"name": "nombre_rama",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "dim_unidad"
+		}
+	}
+}
