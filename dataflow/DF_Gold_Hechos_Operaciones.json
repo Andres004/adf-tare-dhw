@@ -1,0 +1,190 @@
+{
+	"name": "DF_Gold_Hechos_Operaciones",
+	"properties": {
+		"folder": {
+			"name": "Gold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "SilverOperaciones"
+				},
+				{
+					"dataset": {
+						"referenceName": "Gold_Dim_Tipo_Operacion",
+						"type": "DatasetReference"
+					},
+					"name": "DimTipoOp"
+				},
+				{
+					"dataset": {
+						"referenceName": "Gold_Dim_Unidad",
+						"type": "DatasetReference"
+					},
+					"name": "DimUnidad"
+				},
+				{
+					"dataset": {
+						"referenceName": "Gold_Dim_Zona_Operacion",
+						"type": "DatasetReference"
+					},
+					"name": "DimZona"
+				},
+				{
+					"dataset": {
+						"referenceName": "Gold_Dim_Tiempo",
+						"type": "DatasetReference"
+					},
+					"name": "DimTiempoInicio"
+				},
+				{
+					"dataset": {
+						"referenceName": "Gold_Dim_Tiempo",
+						"type": "DatasetReference"
+					},
+					"name": "DimTiempoFin"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "lookup2"
+				},
+				{
+					"name": "lookup3"
+				},
+				{
+					"name": "lookup4"
+				},
+				{
+					"name": "lookup5"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_operacion as string,",
+				"          id_tipo as string,",
+				"          id_unidad_resp as string,",
+				"          id_zona as string,",
+				"          nombre_operacion as string,",
+				"          fecha_inicio as date,",
+				"          fecha_fin as date,",
+				"          efectivos_desplegados as integer,",
+				"          vehiculos_utilizados as string,",
+				"          duracion_dias as integer,",
+				"          costo_operacion as decimal(18,2),",
+				"          resultado as string,",
+				"          detenidos as integer,",
+				"          area_km2 as decimal(10,2),",
+				"          incidentes as string,",
+				"          observaciones as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SilverOperaciones",
+				"source(output(",
+				"          tipo_op_key as integer,",
+				"          id_tipo_origen as integer,",
+				"          nombre as string,",
+				"          categoria as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DimTipoOp",
+				"source(output(",
+				"          unidad_key as integer,",
+				"          id_unidad_origen as integer,",
+				"          nombre_unidad as string,",
+				"          codigo as string,",
+				"          ciudad as string,",
+				"          departamento as string,",
+				"          tipo_cuartel as string,",
+				"          nombre_brigada as string,",
+				"          nombre_division as string,",
+				"          nombre_rama as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DimUnidad",
+				"source(output(",
+				"          zona_key as integer,",
+				"          id_zona_origen as integer,",
+				"          nombre as string,",
+				"          departamento as string,",
+				"          frontera_con as string,",
+				"          tipo_terreno as string,",
+				"          altitud_msnm as integer,",
+				"          acceso_carretero as string,",
+				"          nivel_riesgo as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DimZona",
+				"source(output(",
+				"          fecha_key as integer,",
+				"          fecha as date,",
+				"          dia_semana as integer,",
+				"          nombre_dia as string,",
+				"          dia_mes as integer,",
+				"          mes as integer,",
+				"          nombre_mes as string,",
+				"          trimestre as integer,",
+				"          anio as integer,",
+				"          es_fin_semana as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DimTiempoInicio",
+				"source(output(",
+				"          fecha_key as integer,",
+				"          fecha as date,",
+				"          dia_semana as integer,",
+				"          nombre_dia as string,",
+				"          dia_mes as integer,",
+				"          mes as integer,",
+				"          nombre_mes as string,",
+				"          trimestre as integer,",
+				"          anio as integer,",
+				"          es_fin_semana as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DimTiempoFin",
+				"SilverOperaciones, DimTipoOp lookup(toInteger(id_tipo) == id_tipo_origen,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1, DimUnidad lookup(toInteger(id_unidad_resp) == id_unidad_origen,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup2",
+				"lookup2, DimZona lookup(toInteger(id_zona) == id_zona_origen,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup3",
+				"lookup3, DimTiempoInicio lookup(toInteger(toString(fecha_inicio, 'yyyyMMdd')) == fecha_key,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup4",
+				"lookup4, DimTiempoFin lookup(toInteger(toString(fecha_fin, 'yyyyMMdd')) == DimTiempoFin@fecha_key,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup5"
+			]
+		}
+	}
+}
