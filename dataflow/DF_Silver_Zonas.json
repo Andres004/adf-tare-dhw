@@ -50,7 +50,7 @@
 				"          frontera_con = iif(upper(trim(frontera_con)) == 'NULL', toString(null()), trim(frontera_con)),",
 				"          tipo_terreno = lower(trim(tipo_terreno)),",
 				"          altitud_msnm = toInteger(altitud_msnm)    ,",
-				"          acceso_carretero = ERROR_FUNCTION('')) ~> FiltroZonas",
+				"          nivel_riesgo = trim(nivel_riesgo)) ~> FiltroZonas",
 				"FiltroZonas sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -79,7 +79,7 @@
 				"          frontera_con,",
 				"          tipo_terreno,",
 				"          altitud_msnm,",
-				"          acceso_carretero,",
+				"          acceso_carretero = nivel_riesgo,",
 				"          nivel_riesgo",
 				"     )) ~> SilverZonas"
 			]

@@ -1,0 +1,69 @@
+{
+	"name": "DF_Silver_Tipos_Operaciones",
+	"properties": {
+		"folder": {
+			"name": "Silve"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Bronze_Tipos_Operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "BronzeTiposOperaciones"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Silver_Tipos_Operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "SilverTiposOperaciones"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FiltroTiposOperacioens"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_tipo as string,",
+				"          nombre as string,",
+				"          categoria as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BronzeTiposOperaciones",
+				"BronzeTiposOperaciones derive(id_tipo = toInteger(id_tipo),",
+				"          nombre = initCap(trim(nombre)),",
+				"          categoria = initCap(replace(trim(categoria), '_', ' '))) ~> FiltroTiposOperacioens",
+				"FiltroTiposOperacioens sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_tipo as string,",
+				"          nombre as string,",
+				"          categoria as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_tipo,",
+				"          nombre,",
+				"          categoria",
+				"     )) ~> SilverTiposOperaciones"
+			]
+		}
+	}
+}

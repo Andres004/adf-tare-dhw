@@ -58,7 +58,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "Bronze_Tipos_Operaciones",
+						"referenceName": "DBO_Tipos_Operaciones",
 						"type": "DatasetReference"
 					},
 					"name": "OriTiposOperaciones"
@@ -250,7 +250,7 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> OriTiposMovimiento",
 				"source(output(",
-				"          id_tipo as string,",
+				"          id_tipo as integer,",
 				"          nombre as string,",
 				"          categoria as string",
 				"     ),",
